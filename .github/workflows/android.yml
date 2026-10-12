@@ -1,0 +1,61 @@
+name: Android CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-and-build:
+    name: Analyze, test, and build ARM64 APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Flutter stable
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Generate Android project and launcher icon
+        run: bash scripts/bootstrap_android.sh
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Check Dart formatting
+        run: dart format --output=none --set-exit-if-changed lib test
+
+      - name: Static analysis
+        run: flutter analyze
+
+      - name: Widget tests
+        run: flutter test --reporter expanded
+
+      - name: Build release APK (ARM64 only)
+        run: flutter build apk --release --target-platform android-arm64
+
+      - name: Rename APK
+        run: cp build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/hyouka-notes-arm64.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: hyouka-notes-arm64-apk
+          path: build/app/outputs/flutter-apk/hyouka-notes-arm64.apk
+          if-no-files-found: error
+          retention-days: 14
