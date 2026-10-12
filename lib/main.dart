@@ -741,12 +741,9 @@ String _formatTimestamp(DateTime date) {
   final hour = date.hour % 12 == 0 ? 12 : date.hour % 12;
   final minute = date.minute.toString().padLeft(2, '0');
   final period = date.hour >= 12 ? 'PM' : 'AM';
-  if (isToday) {
-    return 'Today • ' + hour.toString() + ':' + minute + ' ' + period;
-  }
-  return date.day.toString().padLeft(2, '0') +
-      '/' +
-      date.month.toString().padLeft(2, '0') +
-      '/' +
-      date.year.toString();
+  if (isToday) return 'Today • $hour:$minute $period';
+
+  final day = date.day.toString().padLeft(2, '0');
+  final month = date.month.toString().padLeft(2, '0');
+  return '$day/$month/${date.year}';
 }
