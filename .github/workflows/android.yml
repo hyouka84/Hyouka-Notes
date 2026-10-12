@@ -10,6 +10,11 @@ on:
 permissions:
   contents: read
 
+env:
+  GIT_CONFIG_COUNT: "1"
+  GIT_CONFIG_KEY_0: init.defaultBranch
+  GIT_CONFIG_VALUE_0: main
+
 jobs:
   verify-and-build:
     name: Analyze, test, and build ARM64 APK
@@ -54,6 +59,8 @@ jobs:
 
       - name: Build release APK (ARM64 only)
         run: flutter build apk --release --target-platform android-arm64
+        env:
+          GRADLE_OPTS: -Dorg.gradle.vfs.watch=false
 
       - name: Rename APK
         run: cp build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/hyouka-notes-arm64.apk
